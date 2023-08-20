@@ -32,7 +32,7 @@ public class UserService {
     }
 
     private static boolean hasEnoughAmount(User sender, BigDecimal value) {
-        return sender.getBalance().compareTo(value) > 0;
+        return sender.getBalance().compareTo(value) >= 0;
     }
 
     public User findById(Long id) throws Exception {
