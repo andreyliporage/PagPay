@@ -2,11 +2,14 @@ package com.pagpay.services;
 
 import com.pagpay.domain.user.User;
 import com.pagpay.domain.user.UserType;
+import com.pagpay.dtos.UserDTO;
 import com.pagpay.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -38,5 +41,31 @@ public class UserService {
 
     public void saveUser(User user) {
         this.repository.save(user);
+    }
+
+    public User createUser(UserDTO userDTO) throws Exception {
+        validateEmail(userDTO);
+        validateDocument(userDTO);
+        User newUser = new User(userDTO);
+        this.saveUser(newUser);
+        return newUser;
+    }
+
+    public List<User> getAll() {
+        return this.repository.findAll();
+    }
+
+    private void validateEmail(UserDTO userDTO) throws Exception {
+        Optional<User> user = this.repository.findUserByEmail(userDTO.email());
+        if(user.isPresent()) {
+            throw new Exception("E-mail já cadastrado");
+        }
+    }
+
+    private void validateDocument(UserDTO userDTO) throws Exception {
+        Optional<User> user = this.repository.findUserByDocument(userDTO.document());
+        if (user.isPresent()) {
+            throw new Exception("Documento já cadastrado");
+        }
     }
 }
