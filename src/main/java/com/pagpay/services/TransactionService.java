@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -21,9 +22,11 @@ public class TransactionService {
     @Autowired
     private UserService userService;
     @Autowired
+    private NotificationService notificationService;
+    @Autowired
     private RestTemplate restTemplate;
 
-    public void createTransaction(TransactionDTO transactionDTO) throws Exception {
+    public Transaction createTransaction(TransactionDTO transactionDTO) throws Exception {
         User sender = this.userService.findById(transactionDTO.senderId());
         User receiver = this.userService.findById(transactionDTO.receiverId());
 
@@ -41,6 +44,10 @@ public class TransactionService {
         this.repository.save(transaction);
         this.userService.saveUser(sender);
         this.userService.saveUser(receiver);
+
+        //this.notificationService.sendNotification(sender, "Transação realizada!");
+
+        return transaction;
     }
 
     private boolean isAuthorized() {
@@ -68,5 +75,9 @@ public class TransactionService {
 
     private static BigDecimal returnNewAmountAfterTransactionReceiver(User receiver, Transaction transaction) {
         return receiver.getBalance().add(transaction.getAmount());
+    }
+
+    public List<Transaction> getAll() {
+        return this.repository.findAll();
     }
 }
