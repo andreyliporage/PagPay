@@ -4,7 +4,9 @@ import com.pagpay.domain.user.User;
 import com.pagpay.domain.user.UserType;
 import com.pagpay.dtos.UserDTO;
 import com.pagpay.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,15 +37,15 @@ public class UserService {
         return sender.getBalance().compareTo(value) >= 0;
     }
 
-    public User findById(Long id) throws Exception {
-        return this.repository.findById(id).orElseThrow(() -> new Exception("Usuário não encontrado"));
+    public User findById(Long id) {
+        return this.repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
     }
 
     public void saveUser(User user) {
         this.repository.save(user);
     }
 
-    public User createUser(UserDTO userDTO) throws Exception {
+    public User createUser(UserDTO userDTO) {
         validateEmail(userDTO);
         validateDocument(userDTO);
         User newUser = new User(userDTO);
@@ -55,17 +57,17 @@ public class UserService {
         return this.repository.findAll();
     }
 
-    private void validateEmail(UserDTO userDTO) throws Exception {
+    private void validateEmail(UserDTO userDTO) {
         Optional<User> user = this.repository.findUserByEmail(userDTO.email());
         if(user.isPresent()) {
-            throw new Exception("E-mail já cadastrado");
+            throw new DataIntegrityViolationException("E-mail já cadastrado");
         }
     }
 
-    private void validateDocument(UserDTO userDTO) throws Exception {
+    private void validateDocument(UserDTO userDTO) {
         Optional<User> user = this.repository.findUserByDocument(userDTO.document());
         if (user.isPresent()) {
-            throw new Exception("Documento já cadastrado");
+            throw new DataIntegrityViolationException("Documento já cadastrado");
         }
     }
 }
